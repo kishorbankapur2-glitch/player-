@@ -7,7 +7,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
-<title>Careless Player</title>
+<title>Careless Player · Smart Estimate</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600&display=swap" rel="stylesheet">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -100,6 +100,49 @@ object-fit: contain;
 aspect-ratio: 16 / 9;
 border-radius: 20px;
 transition: border-radius 0.2s;
+}
+/* ----- GLASS CLOCK PANELS ----- */
+.time-panel {
+position: absolute;
+z-index: 40;
+background: rgba(10, 12, 18, 0.7);
+backdrop-filter: blur(24px);
+border-radius: 60px;
+padding: 6px 16px;
+border: 1px solid rgba(255, 255, 255, 0.25);
+box-shadow: 0 6px 14px rgba(0,0,0,0.3);
+font-family: 'Inter', monospace;
+font-weight: 500;
+font-size: 0.85rem;
+letter-spacing: 0.3px;
+color: white;
+white-space: nowrap;
+transition: transform 0.2s ease, background 0.2s;
+pointer-events: none;
+backface-visibility: hidden;
+}
+@media (max-width: 560px) {
+.time-panel {
+padding: 4px 12px;
+font-size: 0.7rem;
+}
+}
+.real-clock {
+top: 14px;
+left: 14px;
+}
+.estimate-clock {
+top: 14px;
+right: 14px;
+}
+/* subtle glow on update */
+@keyframes clockGlow {
+0% { text-shadow: 0 0 0px rgba(255,255,200,0); border-color: rgba(255,255,255,0.25); }
+40% { text-shadow: 0 0 6px rgba(255,240,150,0.8); border-color: rgba(255,220,100,0.7); background: rgba(15, 20, 35, 0.9); }
+100% { text-shadow: 0 0 0px rgba(255,255,200,0); border-color: rgba(255,255,255,0.25); }
+}
+.glow-update {
+animation: clockGlow 0.28s ease-out;
 }
 .controls-panel {
 margin-top: 16px;
@@ -255,6 +298,11 @@ letter-spacing: 0.5px;
 pointer-events: none;
 }
 .pip-hidden { display: none !important; }
+.video-wrapper:fullscreen .time-panel,
+.video-wrapper:-webkit-full-screen .time-panel {
+pointer-events: none;
+z-index: 200;
+}
 </style>
 </head>
 <body>
@@ -263,6 +311,11 @@ pointer-events: none;
 <div class="player-title">CARELESS PLAYER</div>
 <div class="video-wrapper" id="videoContainer">
 <video id="video" preload="metadata" playsinline webkit-playsinline></video>
+
+<!-- CLOCKS: Left = live time, Right = estimated remaining + finish time (ex: "45m • 11:11 PM") -->
+<div id="realTimeClock" class="time-panel real-clock">--:-- --</div>
+<div id="estimateClock" class="time-panel estimate-clock">--m • --:-- --</div>
+
 <div class="fs-overlay" id="fsOverlay">
 <input type="range" id="progressFS" class="progress-bar progress-fs" min="0" max="100" value="0">
 <div class="time-fs" id="timeFS">00:00 / 00:00</div>
@@ -331,6 +384,7 @@ await screen.orientation.lock('landscape-primary');
 }
 document.addEventListener('click', () => { requestLandscapeLock(); }, { once: true });
 document.addEventListener('touchstart', () => { requestLandscapeLock(); }, { once: true });
+
 const video = document.getElementById('video');
 const videoContainer = document.getElementById('videoContainer');
 const fsOverlay = document.getElementById('fsOverlay');
@@ -352,10 +406,17 @@ const fsSpeed = document.getElementById('fsSpeed');
 const fsPip = document.getElementById('fsPip');
 const fsExit = document.getElementById('fsExit');
 const fsFileInput = document.getElementById('fsFileInput');
+
+// CLOCK ELEMENTS
+const realClockEl = document.getElementById('realTimeClock');
+const estimateClockEl = document.getElementById('estimateClock');
+
 let speedIndex = 0;
 const speeds = [1, 1.25, 1.5, 1.75, 2, 2.5, 3];
 let fullscreenActive = false;
 let hideTimeout = null;
+
+// ---------- UTILITIES ----------
 function formatTime(seconds) {
 if (isNaN(seconds) || !isFinite(seconds) || seconds < 0) return '00:00';
 const hrs = Math.floor(seconds / 3600);
@@ -367,6 +428,106 @@ return `${hrs}:${pad(mins)}:${pad(secs)}`;
 }
 return `${pad(mins)}:${pad(secs)}`;
 }
+
+// Format remaining minutes (rounded) — show "45m" or "1h 12m" for longer videos
+function formatRemainingMinutes(remainingSeconds) {
+if (isNaN(remainingSeconds) || !isFinite(remainingSeconds) || remainingSeconds <= 0) return '0m';
+const totalMinutes = Math.ceil(remainingSeconds / 60);
+if (totalMinutes < 60) {
+return `${totalMinutes}m`;
+}
+const hours = Math.floor(totalMinutes / 60);
+const mins = totalMinutes % 60;
+if (mins === 0) return `${hours}h`;
+return `${hours}h ${mins}m`;
+}
+
+// Real-time clock (HH:MM AM/PM)
+function updateRealTimeClock() {
+const now = new Date();
+let hours = now.getHours();
+const minutes = now.getMinutes();
+const ampm = hours >= 12 ? 'PM' : 'AM';
+let hour12 = hours % 12;
+if (hour12 === 0) hour12 = 12;
+const minuteStr = minutes < 10 ? '0' + minutes : minutes;
+const timeString = `${hour12}:${minuteStr} ${ampm}`;
+if (realClockEl.textContent !== timeString) {
+realClockEl.textContent = timeString;
+addGlowEffect(realClockEl);
+}
+}
+
+// Compute finish timestamp based on remaining time / playback rate
+function computeFinishDate() {
+if (!video.duration || isNaN(video.duration) || !isFinite(video.duration) || video.duration === Infinity) {
+return null;
+}
+const now = new Date();
+const currentTime = video.currentTime;
+const remainingRaw = video.duration - currentTime;
+if (remainingRaw <= 0.05) return null;
+const effectiveRemainingSeconds = remainingRaw / video.playbackRate;
+if (!isFinite(effectiveRemainingSeconds) || effectiveRemainingSeconds < 0) return null;
+return new Date(now.getTime() + effectiveRemainingSeconds * 1000);
+}
+
+// Format finish time (ex: 11:11 PM)
+function formatFinishTime(date) {
+if (!date) return '--:-- --';
+const hours = date.getHours();
+const minutes = date.getMinutes();
+const ampm = hours >= 12 ? 'PM' : 'AM';
+let hour12 = hours % 12;
+if (hour12 === 0) hour12 = 12;
+const minuteStr = minutes < 10 ? '0' + minutes : minutes;
+return `${hour12}:${minuteStr} ${ampm}`;
+}
+
+// NEW: Build estimate string: "remaining • finishTime" e.g. "45m • 11:11 PM"
+function updateEstimateClock() {
+const finishDate = computeFinishDate();
+if (!video.duration || isNaN(video.duration) || !isFinite(video.duration) || video.duration === Infinity || video.currentTime >= video.duration - 0.05) {
+// video ended or not ready
+if (video.ended || (video.duration > 0 && video.currentTime >= video.duration - 0.05)) {
+estimateClockEl.textContent = `0m • --:-- --`;
+} else {
+estimateClockEl.textContent = `--m • --:-- --`;
+}
+addGlowEffect(estimateClockEl);
+return;
+}
+const remainingRawSec = video.duration - video.currentTime;
+const effectiveRemainingSec = remainingRawSec / video.playbackRate;
+if (!isFinite(effectiveRemainingSec) || effectiveRemainingSec < 0) {
+estimateClockEl.textContent = `--m • --:-- --`;
+addGlowEffect(estimateClockEl);
+return;
+}
+const remainingMinutesFormatted = formatRemainingMinutes(effectiveRemainingSec);
+let finishTimeFormatted = '--:-- --';
+if (finishDate && finishDate.getTime() > 0) {
+finishTimeFormatted = formatFinishTime(finishDate);
+}
+const estimateText = `${remainingMinutesFormatted} • ${finishTimeFormatted}`;
+if (estimateClockEl.textContent !== estimateText) {
+estimateClockEl.textContent = estimateText;
+addGlowEffect(estimateClockEl);
+}
+}
+
+function refreshAllClocks() {
+updateRealTimeClock();
+updateEstimateClock();
+}
+
+function addGlowEffect(el) {
+if (!el) return;
+el.classList.add('glow-update');
+setTimeout(() => el.classList.remove('glow-update'), 280);
+}
+
+// ---------- VIDEO CORE ----------
 function updateProgressAndTime() {
 if (!video.duration || isNaN(video.duration) || video.duration === Infinity) return;
 const percent = (video.currentTime / video.duration) * 100;
@@ -375,12 +536,15 @@ if (progressFS) progressFS.value = percent;
 const timeStr = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
 timeMain.textContent = timeStr;
 if (timeFS) timeFS.textContent = timeStr;
+updateEstimateClock();
 }
+
 function setPlayPauseButtonState(isPlaying) {
 const playLabel = isPlaying ? 'Pause' : 'Play';
 btnPlay.textContent = playLabel;
 if (fsPlay) fsPlay.textContent = playLabel;
 }
+
 function togglePlayback() {
 if (video.paused) {
 video.play().catch(e => console.log("play error", e));
@@ -388,23 +552,31 @@ video.play().catch(e => console.log("play error", e));
 video.pause();
 }
 }
+
 function updateSpeedUI() {
 const spd = speeds[speedIndex];
 const label = spd.toFixed(2).replace(/\.?0+$/, '') + 'x';
 btnSpeed.textContent = label;
 if (fsSpeed) fsSpeed.textContent = label;
 video.playbackRate = spd;
+updateEstimateClock(); 
+refreshAllClocks();
 }
+
 function nextSpeed() {
 speedIndex = (speedIndex + 1) % speeds.length;
 updateSpeedUI();
 }
+
 function skipSeconds(delta) {
 if (!video.duration || isNaN(video.duration)) return;
 let newTime = video.currentTime + delta;
 newTime = Math.max(0, Math.min(newTime, video.duration));
 video.currentTime = newTime;
+updateProgressAndTime();
+updateEstimateClock();
 }
+
 async function togglePiP() {
 if (!document.pictureInPictureEnabled) return;
 try {
@@ -413,10 +585,9 @@ await document.exitPictureInPicture();
 } else {
 await video.requestPictureInPicture();
 }
-} catch (err) {
-console.warn("PiP error", err);
+} catch (err) { console.warn("PiP error", err); }
 }
-}
+
 function loadVideoFile(file) {
 if (!file) return;
 if (video.src && video.src.startsWith('blob:')) {
@@ -425,11 +596,21 @@ URL.revokeObjectURL(video.src);
 const url = URL.createObjectURL(file);
 video.src = url;
 video.load();
-video.play().catch(e => console.log("auto play error", e));
+video.play().catch(e => console.log("autoplay blocked", e));
 speedIndex = speeds.indexOf(1);
 if (speedIndex === -1) speedIndex = 0;
 updateSpeedUI();
+video.addEventListener('loadedmetadata', function onMeta() {
+updateProgressAndTime();
+updateEstimateClock();
+refreshAllClocks();
+video.removeEventListener('loadedmetadata', onMeta);
+}, { once: true });
+updateRealTimeClock();
+updateEstimateClock();
 }
+
+// FULLSCREEN HANDLING
 async function enterFullscreen() {
 try {
 const requestMethod = videoContainer.requestFullscreen || videoContainer.webkitRequestFullscreen;
@@ -438,9 +619,7 @@ await requestMethod.call(videoContainer);
 fullscreenActive = true;
 setTimeout(() => requestLandscapeLock(), 150);
 }
-} catch (err) {
-console.error("Fullscreen error", err);
-}
+} catch (err) { console.error("Fullscreen error", err); }
 }
 async function exitFullscreen() {
 try {
@@ -448,29 +627,19 @@ const exitMethod = document.exitFullscreen || document.webkitExitFullscreen;
 if (exitMethod && (document.fullscreenElement || document.webkitFullscreenElement)) {
 await exitMethod.call(document);
 fullscreenActive = false;
-} else {
-fullscreenActive = false;
-}
-} catch (err) {
-console.warn("exit fs error", err);
-}
+} else { fullscreenActive = false; }
+} catch (err) { console.warn("exit fs error", err); }
 }
 function toggleFullscreen() {
 if (fullscreenActive || document.fullscreenElement || document.webkitFullscreenElement) {
 exitFullscreen();
-} else {
-enterFullscreen();
-}
+} else { enterFullscreen(); }
 }
 function showOverlay() {
 if (!fullscreenActive && !(document.fullscreenElement || document.webkitFullscreenElement)) return;
 fsOverlay.classList.add('show');
 if (hideTimeout) clearTimeout(hideTimeout);
-if (!video.paused) {
-hideTimeout = setTimeout(() => {
-fsOverlay.classList.remove('show');
-}, 2800);
-}
+if (!video.paused) hideTimeout = setTimeout(() => fsOverlay.classList.remove('show'), 2800);
 }
 function resetOverlayTimer() {
 if (!fullscreenActive && !(document.fullscreenElement || document.webkitFullscreenElement)) return;
@@ -482,16 +651,11 @@ fullscreenActive = !!fsElement;
 if (!fullscreenActive) {
 fsOverlay.classList.remove('show');
 if (hideTimeout) clearTimeout(hideTimeout);
-} else {
-setTimeout(() => { showOverlay(); }, 100);
-}
+} else { setTimeout(() => showOverlay(), 100); }
 }
 document.addEventListener('fullscreenchange', onFullscreenChange);
 document.addEventListener('webkitfullscreenchange', onFullscreenChange);
-videoContainer.addEventListener('dblclick', (e) => {
-e.preventDefault();
-toggleFullscreen();
-});
+videoContainer.addEventListener('dblclick', (e) => { e.preventDefault(); toggleFullscreen(); });
 videoContainer.addEventListener('mousemove', resetOverlayTimer);
 videoContainer.addEventListener('touchstart', resetOverlayTimer);
 video.addEventListener('click', (e) => {
@@ -499,23 +663,36 @@ if (!fullscreenActive && !(document.fullscreenElement || document.webkitFullscre
 togglePlayback();
 }
 });
-video.addEventListener('loadedmetadata', updateProgressAndTime);
-video.addEventListener('timeupdate', updateProgressAndTime);
-video.addEventListener('canplay', updateProgressAndTime);
-video.addEventListener('play', () => setPlayPauseButtonState(true));
+
+video.addEventListener('loadedmetadata', () => { updateProgressAndTime(); refreshAllClocks(); });
+video.addEventListener('timeupdate', () => { updateProgressAndTime(); updateEstimateClock(); });
+video.addEventListener('canplay', () => { updateProgressAndTime(); updateEstimateClock(); });
+video.addEventListener('play', () => { setPlayPauseButtonState(true); updateEstimateClock(); refreshAllClocks(); });
 video.addEventListener('pause', () => setPlayPauseButtonState(false));
+video.addEventListener('seeked', () => { updateProgressAndTime(); updateEstimateClock(); refreshAllClocks(); });
+video.addEventListener('ratechange', () => { updateEstimateClock(); refreshAllClocks(); });
+video.addEventListener('ended', () => {
+updateEstimateClock(); 
+estimateClockEl.textContent = `0m • --:-- --`;
+addGlowEffect(estimateClockEl);
+refreshAllClocks();
+});
+
 progressMain.addEventListener('input', (e) => {
 if (video.duration && isFinite(video.duration)) {
 video.currentTime = (e.target.value / 100) * video.duration;
+updateEstimateClock();
 }
 });
 if (progressFS) {
 progressFS.addEventListener('input', (e) => {
 if (video.duration && isFinite(video.duration)) {
 video.currentTime = (e.target.value / 100) * video.duration;
+updateEstimateClock();
 }
 });
 }
+
 btnPlay.addEventListener('click', togglePlayback);
 btnBack.addEventListener('click', () => skipSeconds(-10));
 btnForward.addEventListener('click', () => skipSeconds(10));
@@ -528,6 +705,7 @@ if (fsForward) fsForward.addEventListener('click', () => skipSeconds(10));
 if (fsSpeed) fsSpeed.addEventListener('click', nextSpeed);
 if (fsPip) fsPip.addEventListener('click', togglePiP);
 if (fsExit) fsExit.addEventListener('click', exitFullscreen);
+
 mainFileInput.addEventListener('change', (e) => {
 if (e.target.files && e.target.files[0]) loadVideoFile(e.target.files[0]);
 mainFileInput.value = '';
@@ -543,16 +721,28 @@ btnPip.style.display = 'none';
 if (fsPip) fsPip.style.display = 'none';
 }
 updateSpeedUI();
-video.addEventListener('loadeddata', () => {
-updateProgressAndTime();
+video.addEventListener('loadeddata', () => { updateProgressAndTime(); updateEstimateClock(); refreshAllClocks(); });
+
+// LIVE CLOCK TICKER (every second update both)
+let clockInterval = setInterval(() => {
+updateRealTimeClock();
+updateEstimateClock(); 
+}, 1000);
+window.addEventListener('beforeunload', () => { if (clockInterval) clearInterval(clockInterval); });
+
+refreshAllClocks();
+document.addEventListener('visibilitychange', () => {
+if (!document.hidden) {
+updateOrientationLock();
+refreshAllClocks();
+updateEstimateClock();
+}
 });
 window.addEventListener('load', () => {
 updateOrientationLock();
 setTimeout(updateOrientationLock, 100);
 setTimeout(updateOrientationLock, 300);
-});
-document.addEventListener('visibilitychange', () => {
-if (!document.hidden) updateOrientationLock();
+refreshAllClocks();
 });
 })();
 </script>
