@@ -6,9 +6,10 @@
 <meta name="theme-color" content="#000000">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>Careless Player</title>
+<link rel="manifest" href="manifest.json">
+<title>Careless Player · Smart Estimate</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600&display=swap');
 
 :root {
   --ios-bg: #000000;
@@ -19,9 +20,7 @@
   --ios-border-bright: rgba(255, 255, 255, 0.22);
   --ios-label: rgba(255, 255, 255, 0.95);
   --ios-label2: rgba(255, 255, 255, 0.55);
-  --ios-label3: rgba(255, 255, 255, 0.3);
   --ios-blue: #0A84FF;
-  --ios-blue-dim: rgba(10, 132, 255, 0.25);
   --ios-fill: rgba(255, 255, 255, 0.08);
   --ios-fill2: rgba(255, 255, 255, 0.12);
   --ios-radius-sm: 10px;
@@ -29,7 +28,7 @@
   --ios-radius-lg: 20px;
   --ios-radius-xl: 28px;
   --blur: blur(40px) saturate(180%);
-  --font: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+  --font: 'Inter', -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -56,7 +55,7 @@ body.force-landscape #app-root {
   transform: translate(-50%, -50%) rotate(90deg);
 }
 
-/* ─── PLAYER CARD ─── */
+/* PLAYER CARD */
 .player-card {
   width: 94%;
   max-width: 900px;
@@ -72,7 +71,7 @@ body.force-landscape #app-root {
     0 8px 24px -8px rgba(0,0,0,0.6);
 }
 
-/* ─── TITLE BAR ─── */
+/* TITLE BAR */
 .title-bar {
   display: flex;
   align-items: center;
@@ -96,21 +95,14 @@ body.force-landscape #app-root {
 .app-icon svg { width: 14px; height: 14px; }
 
 .app-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--ios-label);
-  letter-spacing: -0.2px;
-  text-transform: uppercase;
   font-size: 11px;
+  font-weight: 600;
   letter-spacing: 0.6px;
   color: var(--ios-label2);
+  text-transform: uppercase;
 }
 
-.title-bar-right {
-  display: flex; align-items: center; gap: 6px;
-}
-
-/* ─── VIDEO AREA ─── */
+/* VIDEO AREA */
 .video-wrapper {
   position: relative;
   width: 100%;
@@ -139,7 +131,7 @@ video {
   aspect-ratio: 16/9;
 }
 
-/* ─── GLASS CLOCK PILLS ─── */
+/* GLASS CLOCK PILLS */
 .time-panel {
   position: absolute;
   z-index: 40;
@@ -170,13 +162,13 @@ video {
 
 .glow-update { animation: glowPulse 0.35s ease-out; }
 
-/* ─── CONTROLS SECTION ─── */
+/* CONTROLS SECTION */
 .controls-section {
   padding: 14px 16px 16px;
   display: flex; flex-direction: column; gap: 12px;
 }
 
-/* ─── PROGRESS TRACK ─── */
+/* PROGRESS TRACK */
 .progress-container {
   display: flex; flex-direction: column; gap: 6px;
 }
@@ -197,7 +189,7 @@ video {
   background: var(--ios-blue);
   border-radius: 100px;
   pointer-events: none;
-  transition: width 0.1s linear;
+  transition: width 0.05s linear;
 }
 
 .progress-bar {
@@ -240,7 +232,7 @@ video {
   font-variant-numeric: tabular-nums;
 }
 
-/* ─── BUTTON GRID ─── */
+/* BUTTON GRID */
 .button-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -303,16 +295,6 @@ video {
 
 .ios-btn.btn-primary .btn-label { color: rgba(255,255,255,0.7); }
 
-/* Speed badge */
-.speed-badge {
-  position: absolute;
-  top: 4px; right: 5px;
-  font-size: 8px;
-  font-weight: 700;
-  color: var(--ios-blue);
-  letter-spacing: 0;
-}
-
 /* File label as button */
 .file-label {
   height: 44px;
@@ -347,11 +329,11 @@ video {
   font-size: 0;
 }
 
-.file-label .btn-icon { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; line-height: 1; }
+.file-label .btn-icon { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; }
 .file-label .btn-icon svg { display: block; }
 .file-label .btn-label { font-size: 10px; font-weight: 500; color: var(--ios-label2); }
 
-/* ─── FULLSCREEN OVERLAY ─── */
+/* FULLSCREEN OVERLAY */
 .fs-overlay {
   position: absolute; top: 0; left: 0;
   width: 100%; height: 100%;
@@ -367,19 +349,13 @@ video {
   pointer-events: auto;
 }
 
-/* Gradient scrim */
 .fs-overlay::before {
   content: '';
   position: absolute; inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(0,0,0,0.0) 40%,
-    rgba(0,0,0,0.6) 100%
-  );
+  background: linear-gradient(to bottom, rgba(0,0,0,0.0) 40%, rgba(0,0,0,0.6) 100%);
   pointer-events: none;
 }
 
-/* FS progress */
 .progress-fs-container {
   position: absolute;
   bottom: 72px;
@@ -404,7 +380,6 @@ video {
   font-variant-numeric: tabular-nums;
 }
 
-/* FS controls pill */
 .fs-controls-group {
   position: absolute;
   right: 16px;
@@ -431,13 +406,13 @@ video {
   flex: none;
 }
 
-/* ─── RESPONSIVE ─── */
 @media (max-width: 480px) {
   .button-grid { gap: 6px; }
   .ios-btn, .file-label { height: 40px; }
   .ios-btn .btn-icon, .file-label .btn-icon { width: 16px; height: 16px; }
   .title-bar { padding: 12px 14px 10px; }
   .controls-section { padding: 12px 12px 14px; gap: 10px; }
+  .time-panel { font-size: 10px; padding: 4px 10px; }
 }
 
 @media (max-width: 360px) {
@@ -449,7 +424,6 @@ video {
 <div id="app-root">
   <div class="player-card">
     
-    <!-- Title Bar -->
     <div class="title-bar">
       <div class="title-bar-left">
         <div class="app-icon">
@@ -461,17 +435,13 @@ video {
       </div>
     </div>
 
-    <!-- Video -->
     <div class="video-wrapper" id="videoContainer">
       <video id="video" preload="metadata" playsinline webkit-playsinline></video>
 
-      <!-- Clocks -->
       <div id="realTimeClock" class="time-panel real-clock">--:-- --</div>
       <div id="estimateClock" class="time-panel estimate-clock">--m • --:-- --</div>
 
-      <!-- Fullscreen overlay -->
       <div class="fs-overlay" id="fsOverlay">
-        <!-- FS Progress -->
         <div class="progress-fs-container">
           <div class="progress-track-wrapper fs-track" id="fsProgressWrapper">
             <div class="progress-fill" id="fsFill" style="width:0%"></div>
@@ -480,7 +450,6 @@ video {
           </div>
           <div class="time-fs" id="timeFS">00:00 / 00:00</div>
         </div>
-        <!-- FS Controls -->
         <div class="fs-controls-group">
           <button class="ios-btn" id="fsBack">
             <span class="btn-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="19,20 9,12 19,4"/><line x1="5" y1="4" x2="5" y2="20"/></svg></span>
@@ -515,10 +484,7 @@ video {
       </div>
     </div>
 
-    <!-- Controls Section -->
     <div class="controls-section">
-      
-      <!-- Progress -->
       <div class="progress-container">
         <div class="progress-track-wrapper" id="mainProgressWrapper">
           <div class="progress-fill" id="mainFill" style="width:0%"></div>
@@ -531,7 +497,6 @@ video {
         </div>
       </div>
 
-      <!-- Buttons -->
       <div class="button-grid">
         <button class="ios-btn" id="btnBack">
           <span class="btn-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="19,20 9,12 19,4"/><line x1="5" y1="4" x2="5" y2="20"/></svg></span>
@@ -563,314 +528,299 @@ video {
           <input type="file" id="mainFileInput" accept="video/*">
         </label>
       </div>
-
     </div>
   </div>
 </div>
 
 <script>
 (function() {
-
-// ── Orientation ──
-const appRoot = document.getElementById('app-root');
-function isPortrait() {
-  if (screen.orientation?.type) return screen.orientation.type.includes('portrait');
-  return window.innerHeight > window.innerWidth;
-}
-function updateOrientation() {
-  document.body.classList.toggle('force-landscape', isPortrait());
-}
-updateOrientation();
-const onOrientationChange = () => {
-  [20, 80, 200].forEach(d => setTimeout(updateOrientation, d));
-};
-window.addEventListener('resize', onOrientationChange);
-window.addEventListener('orientationchange', onOrientationChange);
-screen.orientation?.addEventListener('change', onOrientationChange);
-async function requestLandscape() {
-  if (!screen.orientation?.lock) return;
-  try { await screen.orientation.lock('landscape'); }
-  catch(e) { try { await screen.orientation.lock('landscape-primary'); } catch(_) {} }
-}
-document.addEventListener('click', () => requestLandscape(), { once: true });
-document.addEventListener('touchstart', () => requestLandscape(), { once: true });
-
-// ── Elements ──
-const video = document.getElementById('video');
-const videoContainer = document.getElementById('videoContainer');
-const fsOverlay = document.getElementById('fsOverlay');
-
-const progressMain = document.getElementById('progressMain');
-const mainFill = document.getElementById('mainFill');
-const mainThumb = document.getElementById('mainThumb');
-const timeCurrentMain = document.getElementById('timeCurrentMain');
-const timeDurationMain = document.getElementById('timeDurationMain');
-
-const btnPlay = document.getElementById('btnPlay');
-const mainPlayIcon = document.getElementById('mainPlayIcon');
-const mainPlayLabel = document.getElementById('mainPlayLabel');
-const btnBack = document.getElementById('btnBack');
-const btnForward = document.getElementById('btnForward');
-const btnSpeed = document.getElementById('btnSpeed');
-const mainSpeedLabel = document.getElementById('mainSpeedLabel');
-const btnPip = document.getElementById('btnPip');
-const btnFullscreen = document.getElementById('btnFullscreen');
-const mainFileInput = document.getElementById('mainFileInput');
-
-const progressFS = document.getElementById('progressFS');
-const fsFill = document.getElementById('fsFill');
-const fsThumb = document.getElementById('fsThumb');
-const timeFS = document.getElementById('timeFS');
-const fsPlay = document.getElementById('fsPlay');
-const fsPlayIcon = document.getElementById('fsPlayIcon');
-const fsPlayLabel = document.getElementById('fsPlayLabel');
-const fsBack = document.getElementById('fsBack');
-const fsForward = document.getElementById('fsForward');
-const fsSpeed = document.getElementById('fsSpeed');
-const fsSpeedLabel = document.getElementById('fsSpeedLabel');
-const fsPip = document.getElementById('fsPip');
-const fsExit = document.getElementById('fsExit');
-const fsFileInput = document.getElementById('fsFileInput');
-
-const realClockEl = document.getElementById('realTimeClock');
-const estimateClockEl = document.getElementById('estimateClock');
-
-let speedIndex = 0;
-const speeds = [1, 1.25, 1.5, 1.75, 2, 2.5, 3];
-let fullscreenActive = false;
-let hideTimeout = null;
-
-// ── Utils ──
-function pad(n) { return n < 10 ? '0' + n : String(n); }
-function formatTime(s) {
-  if (isNaN(s) || !isFinite(s) || s < 0) return '0:00';
-  const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = Math.floor(s%60);
-  return h > 0 ? `${h}:${pad(m)}:${pad(sec)}` : `${m}:${pad(sec)}`;
-}
-function formatRemaining(s) {
-  if (isNaN(s) || !isFinite(s) || s <= 0) return '0m';
-  const mins = Math.ceil(s/60);
-  if (mins < 60) return `${mins}m`;
-  const h = Math.floor(mins/60), m = mins%60;
-  return m === 0 ? `${h}h` : `${h}h ${m}m`;
-}
-function formatFinish(d) {
-  if (!d) return '--:-- --';
-  const h = d.getHours(), min = d.getMinutes();
-  const ampm = h >= 12 ? 'PM' : 'AM';
-  const h12 = h%12 || 12;
-  return `${h12}:${pad(min)} ${ampm}`;
-}
-function setPercent(pct) {
-  mainFill.style.width = pct + '%';
-  mainThumb.style.left = pct + '%';
-  fsFill.style.width = pct + '%';
-  fsThumb.style.left = pct + '%';
-  progressMain.value = pct;
-  if (progressFS) progressFS.value = pct;
-}
-
-// ── Clocks ──
-function updateRealClock() {
-  const now = new Date();
-  const h = now.getHours(), m = now.getMinutes();
-  const ampm = h >= 12 ? 'PM' : 'AM';
-  const h12 = h%12 || 12;
-  const str = `${h12}:${pad(m)} ${ampm}`;
-  if (realClockEl.textContent !== str) {
-    realClockEl.textContent = str;
-    glow(realClockEl);
+  // ORIENTATION LOCK (preserved from original)
+  const appRoot = document.getElementById('app-root');
+  function isPortrait() {
+    if (screen.orientation?.type) return screen.orientation.type.includes('portrait');
+    return window.innerHeight > window.innerWidth;
   }
-}
-function computeFinishDate() {
-  if (!video.duration || !isFinite(video.duration) || video.duration === Infinity) return null;
-  const remaining = (video.duration - video.currentTime) / video.playbackRate;
-  if (!isFinite(remaining) || remaining < 0) return null;
-  return new Date(Date.now() + remaining * 1000);
-}
-function updateEstimateClock() {
-  const dur = video.duration;
-  if (!dur || !isFinite(dur) || dur === Infinity) {
-    estimateClockEl.textContent = '--m • --:-- --'; glow(estimateClockEl); return;
+  function updateOrientation() {
+    document.body.classList.toggle('force-landscape', isPortrait());
   }
-  if (video.ended || video.currentTime >= dur - 0.05) {
-    estimateClockEl.textContent = '0m • --:-- --'; glow(estimateClockEl); return;
+  updateOrientation();
+  const onOrientationChange = () => {
+    [20, 80, 200].forEach(d => setTimeout(updateOrientation, d));
+  };
+  window.addEventListener('resize', onOrientationChange);
+  window.addEventListener('orientationchange', onOrientationChange);
+  screen.orientation?.addEventListener('change', onOrientationChange);
+  async function requestLandscape() {
+    if (!screen.orientation?.lock) return;
+    try { await screen.orientation.lock('landscape'); }
+    catch(e) { try { await screen.orientation.lock('landscape-primary'); } catch(_) {} }
   }
-  const remSec = (dur - video.currentTime) / video.playbackRate;
-  const txt = `${formatRemaining(remSec)} • ${formatFinish(computeFinishDate())}`;
-  if (estimateClockEl.textContent !== txt) {
-    estimateClockEl.textContent = txt;
-    glow(estimateClockEl);
+  document.addEventListener('click', () => requestLandscape(), { once: true });
+  document.addEventListener('touchstart', () => requestLandscape(), { once: true });
+
+  // DOM refs
+  const video = document.getElementById('video');
+  const videoContainer = document.getElementById('videoContainer');
+  const fsOverlay = document.getElementById('fsOverlay');
+  const progressMain = document.getElementById('progressMain');
+  const mainFill = document.getElementById('mainFill');
+  const mainThumb = document.getElementById('mainThumb');
+  const timeCurrentMain = document.getElementById('timeCurrentMain');
+  const timeDurationMain = document.getElementById('timeDurationMain');
+  const btnPlay = document.getElementById('btnPlay');
+  const mainPlayIcon = document.getElementById('mainPlayIcon');
+  const mainPlayLabel = document.getElementById('mainPlayLabel');
+  const btnBack = document.getElementById('btnBack');
+  const btnForward = document.getElementById('btnForward');
+  const btnSpeed = document.getElementById('btnSpeed');
+  const mainSpeedLabel = document.getElementById('mainSpeedLabel');
+  const btnPip = document.getElementById('btnPip');
+  const btnFullscreen = document.getElementById('btnFullscreen');
+  const mainFileInput = document.getElementById('mainFileInput');
+  const progressFS = document.getElementById('progressFS');
+  const fsFill = document.getElementById('fsFill');
+  const fsThumb = document.getElementById('fsThumb');
+  const timeFS = document.getElementById('timeFS');
+  const fsPlay = document.getElementById('fsPlay');
+  const fsPlayIcon = document.getElementById('fsPlayIcon');
+  const fsPlayLabel = document.getElementById('fsPlayLabel');
+  const fsBack = document.getElementById('fsBack');
+  const fsForward = document.getElementById('fsForward');
+  const fsSpeed = document.getElementById('fsSpeed');
+  const fsSpeedLabel = document.getElementById('fsSpeedLabel');
+  const fsPip = document.getElementById('fsPip');
+  const fsExit = document.getElementById('fsExit');
+  const fsFileInput = document.getElementById('fsFileInput');
+  const realClockEl = document.getElementById('realTimeClock');
+  const estimateClockEl = document.getElementById('estimateClock');
+
+  let speedIndex = 0;
+  const speeds = [1, 1.25, 1.5, 1.75, 2, 2.5, 3];
+  let fullscreenActive = false;
+  let hideTimeout = null;
+
+  // Utilities
+  function pad(n) { return n < 10 ? '0' + n : String(n); }
+  function formatTime(s) {
+    if (isNaN(s) || !isFinite(s) || s < 0) return '0:00';
+    const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = Math.floor(s%60);
+    return h > 0 ? `${h}:${pad(m)}:${pad(sec)}` : `${m}:${pad(sec)}`;
   }
-}
-function glow(el) {
-  el.classList.remove('glow-update');
-  void el.offsetWidth;
-  el.classList.add('glow-update');
-  setTimeout(() => el.classList.remove('glow-update'), 350);
-}
-function refreshClocks() { updateRealClock(); updateEstimateClock(); }
+  function formatRemaining(s) {
+    if (isNaN(s) || !isFinite(s) || s <= 0) return '0m';
+    const mins = Math.ceil(s/60);
+    if (mins < 60) return `${mins}m`;
+    const h = Math.floor(mins/60), m = mins%60;
+    return m === 0 ? `${h}h` : `${h}h ${m}m`;
+  }
+  function formatFinish(d) {
+    if (!d) return '--:-- --';
+    const h = d.getHours(), min = d.getMinutes();
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const h12 = h%12 || 12;
+    return `${h12}:${pad(min)} ${ampm}`;
+  }
+  function setPercent(pct) {
+    const val = Math.min(100, Math.max(0, pct));
+    mainFill.style.width = val + '%';
+    mainThumb.style.left = val + '%';
+    fsFill.style.width = val + '%';
+    fsThumb.style.left = val + '%';
+    progressMain.value = val;
+    if (progressFS) progressFS.value = val;
+  }
+  function glow(el) {
+    el.classList.remove('glow-update');
+    void el.offsetWidth;
+    el.classList.add('glow-update');
+    setTimeout(() => el.classList.remove('glow-update'), 350);
+  }
 
-// ── Progress / Time ──
-function updateProgress() {
-  if (!video.duration || !isFinite(video.duration) || video.duration === Infinity) return;
-  const pct = (video.currentTime / video.duration) * 100;
-  setPercent(pct);
-  timeCurrentMain.textContent = formatTime(video.currentTime);
-  timeDurationMain.textContent = formatTime(video.duration);
-  const timeStr = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
-  if (timeFS) timeFS.textContent = timeStr;
-  updateEstimateClock();
-}
+  // Real time clock
+  function updateRealClock() {
+    const now = new Date();
+    const h = now.getHours(), m = now.getMinutes();
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const h12 = h%12 || 12;
+    const str = `${h12}:${pad(m)} ${ampm}`;
+    if (realClockEl.textContent !== str) {
+      realClockEl.textContent = str;
+      glow(realClockEl);
+    }
+  }
+  function computeFinishDate() {
+    if (!video.duration || !isFinite(video.duration) || video.duration === Infinity) return null;
+    const remaining = (video.duration - video.currentTime) / video.playbackRate;
+    if (!isFinite(remaining) || remaining < 0) return null;
+    return new Date(Date.now() + remaining * 1000);
+  }
+  function updateEstimateClock() {
+    const dur = video.duration;
+    if (!dur || !isFinite(dur) || dur === Infinity) {
+      estimateClockEl.textContent = '--m • --:-- --'; glow(estimateClockEl); return;
+    }
+    if (video.ended || video.currentTime >= dur - 0.05) {
+      estimateClockEl.textContent = '0m • --:-- --'; glow(estimateClockEl); return;
+    }
+    const remSec = (dur - video.currentTime) / video.playbackRate;
+    const finishDate = computeFinishDate();
+    const txt = `${formatRemaining(remSec)} • ${formatFinish(finishDate)}`;
+    if (estimateClockEl.textContent !== txt) {
+      estimateClockEl.textContent = txt;
+      glow(estimateClockEl);
+    }
+  }
+  function refreshClocks() { updateRealClock(); updateEstimateClock(); }
 
-// ── Playback ──
-const SVG_PLAY = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>`;
-const SVG_PAUSE = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>`;
+  // Video progress
+  function updateProgress() {
+    if (!video.duration || !isFinite(video.duration) || video.duration === Infinity) return;
+    const pct = (video.currentTime / video.duration) * 100;
+    setPercent(pct);
+    timeCurrentMain.textContent = formatTime(video.currentTime);
+    timeDurationMain.textContent = formatTime(video.duration);
+    const timeStr = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
+    if (timeFS) timeFS.textContent = timeStr;
+    updateEstimateClock();
+  }
 
-function setPlayState(playing) {
-  mainPlayIcon.innerHTML = playing ? SVG_PAUSE : SVG_PLAY;
-  mainPlayLabel.textContent = playing ? 'Pause' : 'Play';
-  if (fsPlayIcon) fsPlayIcon.innerHTML = playing ? SVG_PAUSE : SVG_PLAY;
-  if (fsPlayLabel) fsPlayLabel.textContent = playing ? 'Pause' : 'Play';
-}
-function togglePlay() {
-  if (video.paused) video.play().catch(e => console.log('play err', e));
-  else video.pause();
-}
-function skip(delta) {
-  if (!video.duration || isNaN(video.duration)) return;
-  video.currentTime = Math.max(0, Math.min(video.currentTime + delta, video.duration));
-  updateProgress();
-}
-function updateSpeedUI() {
-  const s = speeds[speedIndex];
-  const lbl = (Number.isInteger(s) ? s : s.toFixed(2).replace(/\.?0+$/,'')) + '×';
-  mainSpeedLabel.textContent = lbl;
-  if (fsSpeedLabel) fsSpeedLabel.textContent = lbl;
-  video.playbackRate = s;
-  refreshClocks();
-}
-function nextSpeed() {
-  speedIndex = (speedIndex + 1) % speeds.length;
-  updateSpeedUI();
-}
-async function togglePiP() {
-  if (!document.pictureInPictureEnabled) return;
-  try {
-    if (document.pictureInPictureElement === video) await document.exitPictureInPicture();
-    else await video.requestPictureInPicture();
-  } catch(e) { console.warn('PiP', e); }
-}
-function loadFile(file) {
-  if (!file) return;
-  if (video.src?.startsWith('blob:')) URL.revokeObjectURL(video.src);
-  video.src = URL.createObjectURL(file);
-  video.load();
-  video.play().catch(() => {});
-  speedIndex = speeds.indexOf(1); if (speedIndex < 0) speedIndex = 0;
-  updateSpeedUI();
-  video.addEventListener('loadedmetadata', () => { updateProgress(); refreshClocks(); }, { once: true });
-  refreshClocks();
-}
-
-// ── Fullscreen ──
-async function enterFS() {
-  try {
-    const m = videoContainer.requestFullscreen || videoContainer.webkitRequestFullscreen;
-    if (m) { await m.call(videoContainer); fullscreenActive = true; setTimeout(requestLandscape, 150); }
-  } catch(e) {}
-}
-async function exitFS() {
-  try {
-    const m = document.exitFullscreen || document.webkitExitFullscreen;
-    if (m && (document.fullscreenElement || document.webkitFullscreenElement)) await m.call(document);
-  } catch(e) {}
-  fullscreenActive = false;
-}
-function toggleFS() {
-  if (fullscreenActive || document.fullscreenElement || document.webkitFullscreenElement) exitFS();
-  else enterFS();
-}
-function showOverlay() {
-  if (!fullscreenActive && !(document.fullscreenElement || document.webkitFullscreenElement)) return;
-  fsOverlay.classList.add('show');
-  if (hideTimeout) clearTimeout(hideTimeout);
-  if (!video.paused) hideTimeout = setTimeout(() => fsOverlay.classList.remove('show'), 2800);
-}
-function onFSChange() {
-  fullscreenActive = !!(document.fullscreenElement || document.webkitFullscreenElement);
-  if (!fullscreenActive) {
-    fsOverlay.classList.remove('show');
-    if (hideTimeout) clearTimeout(hideTimeout);
-  } else setTimeout(showOverlay, 100);
-}
-
-// ── Event Wiring ──
-document.addEventListener('fullscreenchange', onFSChange);
-document.addEventListener('webkitfullscreenchange', onFSChange);
-videoContainer.addEventListener('dblclick', e => { e.preventDefault(); toggleFS(); });
-videoContainer.addEventListener('mousemove', showOverlay);
-videoContainer.addEventListener('touchstart', showOverlay);
-video.addEventListener('click', () => {
-  if (!fullscreenActive && !document.fullscreenElement && !document.webkitFullscreenElement) togglePlay();
-});
-
-video.addEventListener('loadedmetadata', () => { updateProgress(); refreshClocks(); timeDurationMain.textContent = formatTime(video.duration); });
-video.addEventListener('timeupdate', updateProgress);
-video.addEventListener('canplay', updateProgress);
-video.addEventListener('play', () => { setPlayState(true); refreshClocks(); });
-video.addEventListener('pause', () => setPlayState(false));
-video.addEventListener('seeked', () => { updateProgress(); refreshClocks(); });
-video.addEventListener('ratechange', () => refreshClocks());
-video.addEventListener('ended', () => {
-  estimateClockEl.textContent = '0m • --:-- --';
-  glow(estimateClockEl);
-  setPlayState(false);
-  refreshClocks();
-});
-
-// Progress input
-function handleProgressInput(val) {
-  if (video.duration && isFinite(video.duration)) {
-    video.currentTime = (val/100) * video.duration;
+  const SVG_PLAY = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>`;
+  const SVG_PAUSE = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>`;
+  function setPlayState(playing) {
+    mainPlayIcon.innerHTML = playing ? SVG_PAUSE : SVG_PLAY;
+    mainPlayLabel.textContent = playing ? 'Pause' : 'Play';
+    if (fsPlayIcon) fsPlayIcon.innerHTML = playing ? SVG_PAUSE : SVG_PLAY;
+    if (fsPlayLabel) fsPlayLabel.textContent = playing ? 'Pause' : 'Play';
+  }
+  function togglePlay() {
+    if (video.paused) video.play().catch(e => console.log('play err', e));
+    else video.pause();
+  }
+  function skip(delta) {
+    if (!video.duration || isNaN(video.duration)) return;
+    video.currentTime = Math.max(0, Math.min(video.currentTime + delta, video.duration));
     updateProgress();
   }
-}
-progressMain.addEventListener('input', e => handleProgressInput(+e.target.value));
-if (progressFS) progressFS.addEventListener('input', e => handleProgressInput(+e.target.value));
+  function updateSpeedUI() {
+    const s = speeds[speedIndex];
+    const lbl = (Number.isInteger(s) ? s : s.toFixed(2).replace(/\.?0+$/,'')) + '×';
+    mainSpeedLabel.textContent = lbl;
+    if (fsSpeedLabel) fsSpeedLabel.textContent = lbl;
+    video.playbackRate = s;
+    refreshClocks();
+  }
+  function nextSpeed() {
+    speedIndex = (speedIndex + 1) % speeds.length;
+    updateSpeedUI();
+  }
+  async function togglePiP() {
+    if (!document.pictureInPictureEnabled) return;
+    try {
+      if (document.pictureInPictureElement === video) await document.exitPictureInPicture();
+      else await video.requestPictureInPicture();
+    } catch(e) { console.warn('PiP', e); }
+  }
+  function loadFile(file) {
+    if (!file) return;
+    if (video.src?.startsWith('blob:')) URL.revokeObjectURL(video.src);
+    video.src = URL.createObjectURL(file);
+    video.load();
+    video.play().catch(() => {});
+    speedIndex = speeds.indexOf(1); if (speedIndex < 0) speedIndex = 0;
+    updateSpeedUI();
+    video.addEventListener('loadedmetadata', () => { updateProgress(); refreshClocks(); }, { once: true });
+    refreshClocks();
+  }
 
-btnPlay.addEventListener('click', togglePlay);
-btnBack.addEventListener('click', () => skip(-10));
-btnForward.addEventListener('click', () => skip(10));
-btnSpeed.addEventListener('click', nextSpeed);
-btnPip.addEventListener('click', togglePiP);
-btnFullscreen.addEventListener('click', toggleFS);
+  // Fullscreen
+  async function enterFS() {
+    try {
+      const m = videoContainer.requestFullscreen || videoContainer.webkitRequestFullscreen;
+      if (m) { await m.call(videoContainer); fullscreenActive = true; setTimeout(requestLandscape, 150); }
+    } catch(e) {}
+  }
+  async function exitFS() {
+    try {
+      const m = document.exitFullscreen || document.webkitExitFullscreen;
+      if (m && (document.fullscreenElement || document.webkitFullscreenElement)) await m.call(document);
+    } catch(e) {}
+    fullscreenActive = false;
+  }
+  function toggleFS() {
+    if (fullscreenActive || document.fullscreenElement || document.webkitFullscreenElement) exitFS();
+    else enterFS();
+  }
+  function showOverlay() {
+    if (!fullscreenActive && !(document.fullscreenElement || document.webkitFullscreenElement)) return;
+    fsOverlay.classList.add('show');
+    if (hideTimeout) clearTimeout(hideTimeout);
+    if (!video.paused) hideTimeout = setTimeout(() => fsOverlay.classList.remove('show'), 2800);
+  }
+  function onFSChange() {
+    fullscreenActive = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    if (!fullscreenActive) {
+      fsOverlay.classList.remove('show');
+      if (hideTimeout) clearTimeout(hideTimeout);
+    } else setTimeout(showOverlay, 100);
+  }
 
-if (fsPlay) fsPlay.addEventListener('click', togglePlay);
-if (fsBack) fsBack.addEventListener('click', () => skip(-10));
-if (fsForward) fsForward.addEventListener('click', () => skip(10));
-if (fsSpeed) fsSpeed.addEventListener('click', nextSpeed);
-if (fsPip) fsPip.addEventListener('click', togglePiP);
-if (fsExit) fsExit.addEventListener('click', exitFS);
+  // Event binding
+  document.addEventListener('fullscreenchange', onFSChange);
+  document.addEventListener('webkitfullscreenchange', onFSChange);
+  videoContainer.addEventListener('dblclick', e => { e.preventDefault(); toggleFS(); });
+  videoContainer.addEventListener('mousemove', showOverlay);
+  videoContainer.addEventListener('touchstart', showOverlay);
+  video.addEventListener('click', () => {
+    if (!fullscreenActive && !document.fullscreenElement && !document.webkitFullscreenElement) togglePlay();
+  });
+  video.addEventListener('loadedmetadata', () => { updateProgress(); refreshClocks(); timeDurationMain.textContent = formatTime(video.duration); });
+  video.addEventListener('timeupdate', updateProgress);
+  video.addEventListener('canplay', updateProgress);
+  video.addEventListener('play', () => { setPlayState(true); refreshClocks(); });
+  video.addEventListener('pause', () => setPlayState(false));
+  video.addEventListener('seeked', () => { updateProgress(); refreshClocks(); });
+  video.addEventListener('ratechange', () => refreshClocks());
+  video.addEventListener('ended', () => {
+    estimateClockEl.textContent = '0m • --:-- --';
+    glow(estimateClockEl);
+    setPlayState(false);
+    refreshClocks();
+  });
 
-mainFileInput.addEventListener('change', e => { if (e.target.files?.[0]) loadFile(e.target.files[0]); mainFileInput.value = ''; });
-if (fsFileInput) fsFileInput.addEventListener('change', e => { if (e.target.files?.[0]) loadFile(e.target.files[0]); fsFileInput.value = ''; });
+  function handleProgressInput(val) {
+    if (video.duration && isFinite(video.duration)) {
+      video.currentTime = (val/100) * video.duration;
+      updateProgress();
+    }
+  }
+  progressMain.addEventListener('input', e => handleProgressInput(+e.target.value));
+  if (progressFS) progressFS.addEventListener('input', e => handleProgressInput(+e.target.value));
 
-if (!document.pictureInPictureEnabled) {
-  btnPip.style.display = 'none';
-  if (fsPip) fsPip.style.display = 'none';
-}
+  btnPlay.addEventListener('click', togglePlay);
+  btnBack.addEventListener('click', () => skip(-10));
+  btnForward.addEventListener('click', () => skip(10));
+  btnSpeed.addEventListener('click', nextSpeed);
+  btnPip.addEventListener('click', togglePiP);
+  btnFullscreen.addEventListener('click', toggleFS);
+  if (fsPlay) fsPlay.addEventListener('click', togglePlay);
+  if (fsBack) fsBack.addEventListener('click', () => skip(-10));
+  if (fsForward) fsForward.addEventListener('click', () => skip(10));
+  if (fsSpeed) fsSpeed.addEventListener('click', nextSpeed);
+  if (fsPip) fsPip.addEventListener('click', togglePiP);
+  if (fsExit) fsExit.addEventListener('click', exitFS);
+  mainFileInput.addEventListener('change', e => { if (e.target.files?.[0]) loadFile(e.target.files[0]); mainFileInput.value = ''; });
+  if (fsFileInput) fsFileInput.addEventListener('change', e => { if (e.target.files?.[0]) loadFile(e.target.files[0]); fsFileInput.value = ''; });
+  if (!document.pictureInPictureEnabled) {
+    btnPip.style.display = 'none';
+    if (fsPip) fsPip.style.display = 'none';
+  }
 
-// ── Clock ticker ──
-const clockInterval = setInterval(refreshClocks, 1000);
-window.addEventListener('beforeunload', () => clearInterval(clockInterval));
-
-document.addEventListener('visibilitychange', () => { if (!document.hidden) { updateOrientation(); refreshClocks(); } });
-window.addEventListener('load', () => { updateOrientation(); setTimeout(updateOrientation, 100); setTimeout(updateOrientation, 300); refreshClocks(); });
-
-updateSpeedUI();
-refreshClocks();
-
+  const clockInterval = setInterval(refreshClocks, 1000);
+  window.addEventListener('beforeunload', () => clearInterval(clockInterval));
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { updateOrientation(); refreshClocks(); } });
+  window.addEventListener('load', () => { updateOrientation(); setTimeout(updateOrientation, 100); setTimeout(updateOrientation, 300); refreshClocks(); });
+  updateSpeedUI();
+  refreshClocks();
 })();
 </script>
 </body>
