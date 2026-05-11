@@ -235,7 +235,7 @@ video {
 /* BUTTON GRID */
 .button-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(8, 1fr);
   gap: 8px;
   align-items: center;
 }
@@ -261,6 +261,7 @@ video {
   outline: none;
   position: relative;
   overflow: hidden;
+  text-decoration: none;
 }
 
 .ios-btn:active {
@@ -294,6 +295,24 @@ video {
 }
 
 .ios-btn.btn-primary .btn-label { color: rgba(255,255,255,0.7); }
+
+/* Music button - pink/rose accent */
+.ios-btn.btn-music {
+  background: rgba(255, 45, 85, 0.18);
+  border-color: rgba(255, 45, 85, 0.4);
+}
+
+.ios-btn.btn-music:active {
+  background: rgba(255, 45, 85, 0.3);
+}
+
+.ios-btn.btn-music .btn-label {
+  color: rgba(255, 45, 85, 0.85);
+}
+
+.ios-btn.btn-music .btn-icon svg {
+  color: rgba(255, 45, 85, 0.9);
+}
 
 /* File label as button */
 .file-label {
@@ -407,7 +426,7 @@ video {
 }
 
 @media (max-width: 480px) {
-  .button-grid { gap: 6px; }
+  .button-grid { gap: 6px; grid-template-columns: repeat(4, 1fr); }
   .ios-btn, .file-label { height: 40px; }
   .ios-btn .btn-icon, .file-label .btn-icon { width: 16px; height: 16px; }
   .title-bar { padding: 12px 14px 10px; }
@@ -527,6 +546,11 @@ video {
           <span class="btn-label">File</span>
           <input type="file" id="mainFileInput" accept="video/*">
         </label>
+        <!-- Music Button -->
+        <a href="https://kishorbankapur2-glitch.github.io/swar/" target="_blank" class="ios-btn btn-music" id="btnMusic">
+          <span class="btn-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
+          <span class="btn-label">Music</span>
+        </a>
       </div>
     </div>
   </div>
