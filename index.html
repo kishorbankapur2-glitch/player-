@@ -244,7 +244,6 @@ video {
   transition: max-height 0.35s ease, opacity 0.3s ease;
   pointer-events: none;
 }
-
 .player-card.music-mode .music-controls-row {
   max-height: 0;
   opacity: 0;
@@ -810,7 +809,7 @@ video {
         </div>
       </div>
 
-      <!-- NEW: Music non-fullscreen overlay (Video + Full buttons + volume slider moved here) -->
+      <!-- Music non-fullscreen overlay (Video + Full + Volume) -->
       <div class="music-overlay-panel" id="musicOverlayPanel">
         <span class="music-vol-label">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -833,7 +832,7 @@ video {
         <button class="music-overlay-btn" id="btnMusicOverlayFull" title="Full Screen">Full</button>
       </div>
 
-      <!-- Music fullscreen panel (volume + exit) -->
+      <!-- Music fullscreen panel -->
       <div class="music-fs-panel" id="musicFsPanel">
         <span class="music-vol-label">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
@@ -848,7 +847,6 @@ video {
 
         <span class="music-vol-val" id="musicVolValFs">100%</span>
 
-        <!-- NEW: button to go back to video while in music fullscreen -->
         <button class="music-fs-video" id="musicFsVideo" title="Back to Video">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="8,5 19,12 8,19 8,5"/>
@@ -862,7 +860,7 @@ video {
     </div>
 
     <div class="controls-section">
-      <!-- Music volume row (kept in HTML but hidden by CSS; slider moved to video player overlay) -->
+      <!-- kept but hidden -->
       <div class="music-controls-row" id="musicControlsRow">
         <span class="music-vol-label">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
@@ -876,7 +874,7 @@ video {
         <span class="music-vol-val" id="musicVolVal">100%</span>
       </div>
 
-      <!-- Video controls (hidden in music mode) -->
+      <!-- Video controls -->
       <div class="video-controls-inner" id="videoControlsInner">
         <div class="progress-container">
           <div class="progress-track-wrapper" id="mainProgressWrapper">
@@ -999,15 +997,14 @@ video {
   const btnMusic = document.getElementById('btnMusic');
   const musicBtnLabel = document.getElementById('musicBtnLabel');
   const musicBtnIcon = document.getElementById('musicBtnIcon');
-  const musicFsPanel = document.getElementById('musicFsPanel');
   const musicFsExit = document.getElementById('musicFsExit');
 
-  // NEW: overlay panel refs
+  // overlay panel refs
   const btnMusicOverlayVideo = document.getElementById('btnMusicOverlayVideo');
   const btnMusicOverlayFull = document.getElementById('btnMusicOverlayFull');
   const musicFsVideo = document.getElementById('musicFsVideo');
 
-  // Music volume elements
+  // Music volume elements (kept but hidden)
   const musicVolInput = document.getElementById('musicVolInput');
   const musicVolFill = document.getElementById('musicVolFill');
   const musicVolThumb = document.getElementById('musicVolThumb');
@@ -1017,7 +1014,7 @@ video {
   const musicVolThumbFs = document.getElementById('musicVolThumbFs');
   const musicVolValFs = document.getElementById('musicVolValFs');
 
-  // NEW: overlay slider elements
+  // overlay slider elements
   const musicVolInputOverlay = document.getElementById('musicVolInputOverlay');
   const musicVolFillOverlay = document.getElementById('musicVolFillOverlay');
   const musicVolThumbOverlay = document.getElementById('musicVolThumbOverlay');
@@ -1031,10 +1028,13 @@ video {
   let musicVolume = 100; // 0-100
   let wasPlayingBeforeMusic = false;
 
-  // ─── MUSIC VOLUME via postMessage to iframe ───────────────────────────────────────
+  // IMPORTANT: target origin (better than '*')
+  const MUSIC_ORIGIN = new URL(musicIframe.src).origin;
+
+  // ─── MUSIC VOLUME via postMessage to iframe ────────────────────────────────
   function setMusicVolumeToIframe(vol) {
     try {
-      musicIframe.contentWindow.postMessage({ type: 'setVolume', volume: vol }, '*');
+      musicIframe.contentWindow.postMessage({ type: 'setVolume', volume: vol }, MUSIC_ORIGIN);
     } catch(e) {}
   }
 
@@ -1042,7 +1042,7 @@ video {
     musicVolume = Math.min(100, Math.max(0, val));
     const pct = musicVolume + '%';
 
-    // Main slider (kept in HTML but hidden)
+    // hidden slider
     if (musicVolFill) musicVolFill.style.width = pct;
     if (musicVolThumb) musicVolThumb.style.left = pct;
     if (musicVolInput) musicVolInput.value = musicVolume;
@@ -1054,13 +1054,12 @@ video {
     if (musicVolInputFs) musicVolInputFs.value = musicVolume;
     if (musicVolValFs) musicVolValFs.textContent = pct;
 
-    // Overlay slider (NEW)
+    // overlay slider
     if (musicVolFillOverlay) musicVolFillOverlay.style.width = pct;
     if (musicVolThumbOverlay) musicVolThumbOverlay.style.left = pct;
     if (musicVolInputOverlay) musicVolInputOverlay.value = musicVolume;
     if (musicVolValOverlay) musicVolValOverlay.textContent = pct;
 
-    // Send to iframe
     setMusicVolumeToIframe(musicVolume / 100);
   }
 
@@ -1082,12 +1081,10 @@ video {
     appTitle.textContent = 'Swar · Music';
 
     wasPlayingBeforeMusic = !video.paused && !video.ended;
-    if (!video.paused) video.pause();
+    video.pause();
 
-    // Apply current volume to iframe
     setMusicVolumeToIframe(musicVolume / 100);
 
-    // If fullscreen, switch videoContainer class
     if (fullscreenActive || document.fullscreenElement || document.webkitFullscreenElement) {
       videoContainer.classList.add('music-fs');
     }
@@ -1103,13 +1100,9 @@ video {
     appTitle.textContent = 'Careless Player';
     videoContainer.classList.remove('music-fs');
 
-    // Resume video if it was playing before music mode
-    if (wasPlayingBeforeMusic) {
-      video.play().catch(()=>{});
-    }
+    if (wasPlayingBeforeMusic) video.play().catch(()=>{});
     wasPlayingBeforeMusic = false;
 
-    // If we are in fullscreen, show video fullscreen overlay again
     if (fullscreenActive || document.fullscreenElement || document.webkitFullscreenElement) {
       setTimeout(() => showOverlay(), 0);
     }
@@ -1121,25 +1114,10 @@ video {
     else enterMusicMode();
   });
 
-  // NEW: overlay buttons
-  if (btnMusicOverlayVideo) {
-    btnMusicOverlayVideo.addEventListener('click', (e) => {
-      e.preventDefault();
-      if (isMusicActive) exitMusicMode();
-    });
-  }
-  if (btnMusicOverlayFull) {
-    btnMusicOverlayFull.addEventListener('click', (e) => {
-      e.preventDefault();
-      // In music mode, switch to fullscreen
-      toggleFS();
-    });
-  }
-  if (musicFsVideo) {
-    musicFsVideo.addEventListener('click', () => {
-      if (isMusicActive) exitMusicMode();
-    });
-  }
+  // overlay buttons
+  if (btnMusicOverlayVideo) btnMusicOverlayVideo.addEventListener('click', (e)=>{ e.preventDefault(); if (isMusicActive) exitMusicMode(); });
+  if (btnMusicOverlayFull) btnMusicOverlayFull.addEventListener('click', (e)=>{ e.preventDefault(); toggleFS(); });
+  if (musicFsVideo) musicFsVideo.addEventListener('click', ()=>{ if (isMusicActive) exitMusicMode(); });
 
   // ─── UTILITIES ─────────────────────────────────────────────────────────────
   function pad(n) { return n < 10 ? '0' + n : String(n); }
@@ -1235,8 +1213,8 @@ video {
     if (fsPlayLabel) fsPlayLabel.textContent = playing ? 'Pause' : 'Play';
   }
   function togglePlay() {
-    if (isMusicActive) return; // Don't control video while in music mode
-    if (video.paused) video.play().catch(e => console.log('play err', e));
+    if (isMusicActive) return;
+    if (video.paused) video.play().catch(()=>{});
     else video.pause();
   }
   function skip(delta) {
@@ -1261,7 +1239,7 @@ video {
     try {
       if (document.pictureInPictureElement === video) await document.exitPictureInPicture();
       else await video.requestPictureInPicture();
-    } catch(e) { console.warn('PiP', e); }
+    } catch(e) {}
   }
   function loadFile(file) {
     if (!file) return;
@@ -1273,7 +1251,6 @@ video {
     updateSpeedUI();
     video.addEventListener('loadedmetadata', () => { updateProgress(); refreshClocks(); }, { once: true });
     refreshClocks();
-    // Switch back to video mode if in music mode
     if (isMusicActive) exitMusicMode();
   }
 
@@ -1302,7 +1279,7 @@ video {
     else enterFS();
   }
   function showOverlay() {
-    if (isMusicActive) return; // Don't show video overlay in music mode
+    if (isMusicActive) return;
     if (!fullscreenActive && !(document.fullscreenElement || document.webkitFullscreenElement)) return;
     fsOverlay.classList.add('show');
     if (hideTimeout) clearTimeout(hideTimeout);
@@ -1320,7 +1297,6 @@ video {
     }
   }
 
-  // Music fullscreen exit
   musicFsExit.addEventListener('click', exitFS);
 
   document.addEventListener('fullscreenchange', onFSChange);
@@ -1331,6 +1307,7 @@ video {
   video.addEventListener('click', () => {
     if (!fullscreenActive && !document.fullscreenElement && !document.webkitFullscreenElement) togglePlay();
   });
+
   video.addEventListener('loadedmetadata', () => { updateProgress(); refreshClocks(); timeDurationMain.textContent = formatTime(video.duration); });
   video.addEventListener('timeupdate', updateProgress);
   video.addEventListener('canplay', updateProgress);
@@ -1366,8 +1343,10 @@ video {
   if (fsSpeed) fsSpeed.addEventListener('click', nextSpeed);
   if (fsPip) fsPip.addEventListener('click', togglePiP);
   if (fsExit) fsExit.addEventListener('click', exitFS);
+
   mainFileInput.addEventListener('change', e => { if (e.target.files?.[0]) loadFile(e.target.files[0]); mainFileInput.value = ''; });
   if (fsFileInput) fsFileInput.addEventListener('change', e => { if (e.target.files?.[0]) loadFile(e.target.files[0]); fsFileInput.value = ''; });
+
   if (!document.pictureInPictureEnabled) {
     btnPip.style.display = 'none';
     if (fsPip) fsPip.style.display = 'none';
@@ -1377,6 +1356,7 @@ video {
   window.addEventListener('beforeunload', () => clearInterval(clockInterval));
   document.addEventListener('visibilitychange', () => { if (!document.hidden) { updateOrientation(); refreshClocks(); } });
   window.addEventListener('load', () => { updateOrientation(); setTimeout(updateOrientation, 100); setTimeout(updateOrientation, 300); refreshClocks(); });
+
   updateSpeedUI();
   refreshClocks();
   updateMusicVol(100);
